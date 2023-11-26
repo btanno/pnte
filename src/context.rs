@@ -1,5 +1,6 @@
 pub mod d2d1;
 pub mod d3d11;
+pub mod d3d12;
 
 use crate::*;
 use std::sync::Arc;
