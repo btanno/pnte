@@ -418,9 +418,9 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 
 [[package]]
 name = "wiard"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18cdba79b66cdd5878ef2c955a537c4368d72b30818ba5df9527609f4f1b8c31"
+checksum = "c911c80e5587d0afab9f4cba0920d58ba97303e310d63ccd1017d4b49908fc0e"
 dependencies = [
  "anyhow",
  "env_logger",

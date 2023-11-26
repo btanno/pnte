@@ -150,26 +150,27 @@ impl StrokeStyle {
     }
 }
 
-pub struct DrawCommand {
-    dc: ID2D1DeviceContext5,
+pub struct DrawCommand<'a, T: Backend> {
+    ctx: &'a Context<T>,
 }
 
-impl DrawCommand {
-    pub(crate) fn new(dc: &ID2D1DeviceContext5) -> Self {
-        Self { dc: dc.clone() }
+impl<'a, T: Backend> DrawCommand<'a, T> {
+    pub(crate) fn new(ctx: &'a Context<T>) -> Self {
+        Self { ctx }
     }
 
     #[inline]
     pub fn clear(&self, color: impl Into<Rgba>) {
         unsafe {
             let color = D2D1_COLOR_F::from(color.into());
-            self.dc.Clear(Some(&color));
+            self.ctx.d2d1_device_context.Clear(Some(&color));
         }
     }
 
     #[inline]
     pub fn fill(&self, object: &impl Fill, brush: &impl Brush) {
-        object.fill(&self.dc, brush.handle());
+        let dc = &self.ctx.d2d1_device_context;
+        object.fill(dc, brush.handle());
     }
 
     #[inline]
@@ -180,25 +181,29 @@ impl DrawCommand {
         width: f32,
         stroke_style: Option<&StrokeStyle>,
     ) {
-        object.stroke(&self.dc, brush.handle(), width, stroke_style.map(|s| &s.0));
+        let dc = &self.ctx.d2d1_device_context;
+        object.stroke(dc, brush.handle(), width, stroke_style.map(|s| &s.0));
     }
 
     #[inline]
     pub fn draw_text(
         &self,
-        layout: &TextLayout,
+        text: impl Text,
         position: impl Into<Point<f32>>,
         brush: &impl Brush,
-    ) {
+    ) -> Result<()> {
         unsafe {
+            let dc = &self.ctx.d2d1_device_context;
             let position: Point<f32> = position.into();
-            self.dc.DrawTextLayout(
+            let format = TextFormat::from_handle(&self.ctx.default_text_format);
+            dc.DrawTextLayout(
                 position.into(),
-                layout.handle(),
+                text.layout(&self.ctx, &format)?.handle(),
                 brush.handle(),
                 D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT | D2D1_DRAW_TEXT_OPTIONS_CLIP,
             );
         }
+        Ok(())
     }
 
     #[inline]
@@ -212,8 +217,9 @@ impl DrawCommand {
     ) {
         let src: Option<D2D_RECT_F> = src_rect.map(|src| src.into());
         let dest = D2D_RECT_F::from(dest_rect.into());
+        let dc = &self.ctx.d2d1_device_context;
         unsafe {
-            self.dc.DrawBitmap2(
+            dc.DrawBitmap2(
                 image.bitmap(),
                 Some(&dest),
                 opacity.unwrap_or(1.0),
@@ -227,16 +233,17 @@ impl DrawCommand {
     #[inline]
     pub fn push_clip(&self, rect: impl Into<Rect<f32>>) {
         let rect: Rect<f32> = rect.into();
+        let dc = &self.ctx.d2d1_device_context;
         unsafe {
-            self.dc
-                .PushAxisAlignedClip(&rect.into(), D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+            dc.PushAxisAlignedClip(&rect.into(), D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
         }
     }
 
     #[inline]
     pub fn pop_clip(&self) {
+        let dc = &self.ctx.d2d1_device_context;
         unsafe {
-            self.dc.PopAxisAlignedClip();
+            dc.PopAxisAlignedClip();
         }
     }
 }

@@ -10,12 +10,12 @@ fn main() -> anyhow::Result<()> {
         .build()?;
     let size = window.inner_size().unwrap();
     let dpi = window.dpi().unwrap() as f32;
-    let ctx = pnte::Context::new(pnte::Direct2D::new()?)?;
+    let mut ctx = pnte::Context::new(pnte::Direct2D::new()?)?;
     ctx.set_dpi(dpi, dpi);
     let render_target = ctx.create_render_target(&window, (size.width, size.height))?;
     let text_format =
         pnte::TextFormat::new(&ctx, pnte::Font::System("Yu Gothic UI"), 32.0, None, None)?;
-    let text = pnte::TextLayout::new(
+    let text_layout = pnte::TextLayout::new(
         &ctx,
         "hello! 🚀",
         &text_format,
@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
             wiard::Event::Draw(_) => {
                 ctx.draw(&render_target, |cmd| {
                     cmd.clear((0.0, 0.0, 0.3, 0.0));
-                    cmd.draw_text(&text, (10.0, 10.0), &white);
+                    cmd.draw_text(&text_layout, (10.0, 10.0), &white).ok();
                 })
                 .ok();
             }

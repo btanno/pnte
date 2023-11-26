@@ -23,6 +23,7 @@ fn main() -> anyhow::Result<()> {
         .title("pnte d3d12")
         .build()?;
     let size = window.inner_size().unwrap();
+    let dpi = window.dpi().unwrap();
     let device: ID3D12Device = unsafe {
         let mut p = None;
         D3D12CreateDevice(None, D3D_FEATURE_LEVEL_12_0, &mut p).map(|_| p.unwrap())?
@@ -84,7 +85,8 @@ fn main() -> anyhow::Result<()> {
             })
             .collect::<anyhow::Result<Vec<ID3D12Resource>>>()?
     };
-    let ctx = pnte::Context::new(pnte::Direct3D12::new(&device, &cmd_queue, 0)?)?;
+    let mut ctx = pnte::Context::new(pnte::Direct3D12::new(&device, &cmd_queue, 0)?)?;
+    ctx.set_dpi(dpi as f32, dpi as f32);
     let targets = buffers
         .iter()
         .map(|buffer| -> anyhow::Result<pnte::d3d12::RenderTarget> {
@@ -100,6 +102,9 @@ fn main() -> anyhow::Result<()> {
                 _ => {}
             },
             Err(wiard::TryRecvError::Empty) => unsafe {
+                if window.is_closed() {
+                    continue;
+                }
                 let index = swap_chain.GetCurrentBackBufferIndex() as usize;
                 let mut handle = rtv_heap.GetCPUDescriptorHandleForHeapStart();
                 handle.ptr += inc as usize * index;
@@ -149,11 +154,13 @@ fn main() -> anyhow::Result<()> {
                 cmd_list.Close()?;
                 cmd_queue.ExecuteCommandLists(&[Some(cmd_list.cast().unwrap())]);
                 ctx.draw(target, |cmd| {
-                    let color = pnte::SolidColorBrush::new(&ctx, (0.5, 0.8, 0.0, 1.0)).unwrap();
+                    let yellow_green = pnte::SolidColorBrush::new(&ctx, (0.5, 0.8, 0.0, 1.0)).unwrap();
+                    let white = pnte::SolidColorBrush::new(&ctx, (1.0, 1.8, 1.0, 1.0)).unwrap();
                     cmd.fill(
                         &pnte::Rect::from_point_size((50.0, 50.0), (100.0, 100.0)),
-                        &color,
+                        &yellow_green,
                     );
+                    cmd.draw_text("hello!!!", (200.0, 50.0), &white).ok();
                 })?;
                 swap_chain.Present(0, 0).ok()?;
                 let frame = next_frame;

@@ -4,12 +4,18 @@ pub mod d3d12;
 
 use crate::*;
 use std::sync::Arc;
+use windows::core::HSTRING;
 use windows::Win32::{
+    Foundation::S_OK,
     Graphics::Direct2D::*,
     Graphics::DirectWrite::*,
     Graphics::Imaging::D2D::*,
     Graphics::Imaging::*,
     System::Com::{CoCreateInstance, CLSCTX_INPROC_SERVER},
+    UI::WindowsAndMessaging::{
+        SystemParametersInfoW, NONCLIENTMETRICSW, SPI_GETNONCLIENTMETRICS,
+        SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS,
+    },
 };
 
 pub trait Bitmap {
@@ -67,6 +73,7 @@ pub struct Context<T: Backend> {
     pub(crate) dwrite_factory: IDWriteFactory6,
     pub(crate) font_file_loader: Arc<FontFileLoader>,
     pub(crate) wic_imaging_factory: IWICImagingFactory2,
+    pub(crate) default_text_format: IDWriteTextFormat,
 }
 
 impl<T> Context<T>
@@ -85,33 +92,70 @@ where
         let wic_imaging_factory =
             unsafe { CoCreateInstance(&CLSID_WICImagingFactory2, None, CLSCTX_INPROC_SERVER)? };
         let font_file_loader = FontFileLoader::new(&dwrite_factory)?;
+        let default_text_format = unsafe {
+            let mut metrics = NONCLIENTMETRICSW::default();
+            let ret = SystemParametersInfoW(
+                SPI_GETNONCLIENTMETRICS,
+                0,
+                Some(&mut metrics as *mut _ as *mut std::ffi::c_void),
+                SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
+            );
+            if let Err(e) = ret {
+                if e.code() != S_OK {
+                    return Err(e.into());
+                }
+            }
+            let name_term = metrics
+                .lfCaptionFont
+                .lfFaceName
+                .iter()
+                .position(|c| *c == 0)
+                .unwrap_or(metrics.lfCaptionFont.lfFaceName.len());
+            let font_name =
+                HSTRING::from_wide(&metrics.lfCaptionFont.lfFaceName[..name_term]).unwrap();
+            dwrite_factory.CreateTextFormat(
+                &font_name,
+                None,
+                DWRITE_FONT_WEIGHT_REGULAR,
+                DWRITE_FONT_STYLE_NORMAL,
+                DWRITE_FONT_STRETCH_MEDIUM,
+                FontPoint(14.0).into(),
+                &HSTRING::from(""),
+            )?
+        };
         Ok(Self {
             backend: Arc::new(backend),
             d2d1_device_context,
             dwrite_factory,
             font_file_loader: Arc::new(font_file_loader),
             wic_imaging_factory,
+            default_text_format,
         })
     }
 
     #[inline]
-    pub fn set_dpi(&self, dpi_x: f32, dpi_y: f32) {
+    pub fn set_dpi(&mut self, dpi_x: f32, dpi_y: f32) {
         unsafe {
             self.d2d1_device_context.SetDpi(dpi_x, dpi_y);
         }
     }
 
     #[inline]
-    pub fn set_scale_factor(&self, scale: f32) {
+    pub fn set_scale_factor(&mut self, scale: f32) {
         let scale = scale * 96.0;
         self.set_dpi(scale, scale);
+    }
+
+    #[inline]
+    pub fn set_default_text_format(&mut self, format: &TextFormat) {
+        self.default_text_format = format.handle().clone();
     }
 
     #[inline]
     pub fn draw<R>(
         &self,
         target: &T::RenderTarget,
-        f: impl FnOnce(&DrawCommand) -> R,
+        f: impl FnOnce(DrawCommand<T>) -> R,
     ) -> Result<R> {
         let ctx = &self.d2d1_device_context;
         self.backend.begin_draw(target);
@@ -119,7 +163,7 @@ where
             ctx.SetTarget(target.bitmap());
             ctx.BeginDraw();
         }
-        let ret = f(&DrawCommand::new(ctx));
+        let ret = f(DrawCommand::new(self));
         unsafe {
             ctx.EndDraw(None, None)?;
             ctx.SetTarget(None);

@@ -227,6 +227,17 @@ impl TextFormat {
             _not_sync: UnsafeCell::new(()),
         })
     }
+
+    pub(crate) fn from_handle(format: &IDWriteTextFormat) -> Self {
+        Self {
+            format: format.clone(),
+            _not_sync: UnsafeCell::new(()),
+        }
+    }
+
+    pub(crate) fn handle(&self) -> &IDWriteTextFormat {
+        &self.format
+    }
 }
 
 impl PartialEq for TextFormat {
@@ -246,6 +257,10 @@ impl Clone for TextFormat {
             _not_sync: UnsafeCell::new(()),
         }
     }
+}
+
+pub trait Text {
+    fn layout<T: Backend>(self, ctx: &Context<T>, format: &TextFormat) -> Result<TextLayout>;
 }
 
 #[derive(Debug)]
@@ -355,5 +370,25 @@ impl Clone for TextLayout {
             size: self.size,
             _not_sync: UnsafeCell::new(()),
         }
+    }
+}
+
+impl<'a> Text for &'a TextLayout {
+    fn layout<T: Backend>(self, _ctx: &Context<T>, _format: &TextFormat) -> Result<TextLayout> {
+        Ok(self.clone())
+    }
+}
+
+impl<'a> Text for &'a str {
+    fn layout<T: Backend>(self, ctx: &Context<T>, format: &TextFormat) -> Result<TextLayout> {
+        let layout = TextLayout::new(ctx, self, format, TextAlignment::Center, None)?;
+        Ok(layout)
+    }
+}
+
+impl<'a> Text for &'a String {
+    fn layout<T: Backend>(self, ctx: &Context<T>, format: &TextFormat) -> Result<TextLayout> {
+        let layout = TextLayout::new(ctx, self, format, TextAlignment::Center, None)?;
+        Ok(layout)
     }
 }
