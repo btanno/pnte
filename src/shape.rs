@@ -47,7 +47,7 @@ impl Stroke for Line {
         style: Option<&ID2D1StrokeStyle>,
     ) {
         unsafe {
-            dc.DrawLine(self.0.into(), self.0.into(), brush, width, style);
+            dc.DrawLine(self.0.into(), self.1.into(), brush, width, style);
         }
     }
 }

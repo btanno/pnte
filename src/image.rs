@@ -54,6 +54,16 @@ impl Image {
             Ok(Self(bitmap))
         }
     }
+
+    #[inline]
+    pub fn size(&self) -> Size<f32> {
+        unsafe { self.0.GetSize().into() }
+    }
+
+    #[inline]
+    pub fn pixel_size(&self) -> Size<u32> {
+        unsafe { self.0.GetPixelSize().into() }
+    }
 }
 
 impl Bitmap for Image {
@@ -62,10 +72,10 @@ impl Bitmap for Image {
     }
 
     fn size(&self) -> Size<f32> {
-        unsafe { self.0.GetSize().into() }
+        self.size()
     }
 
     fn pixel_size(&self) -> Size<u32> {
-        unsafe { self.0.GetPixelSize().into() }
+        self.pixel_size()
     }
 }

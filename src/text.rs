@@ -1,7 +1,7 @@
 use crate::*;
 use std::cell::UnsafeCell;
 use windows::core::{ComInterface, HSTRING};
-use windows::Win32::Graphics::DirectWrite::*;
+use windows::Win32::{Foundation::BOOL, Graphics::DirectWrite::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -198,7 +198,7 @@ impl TextFormat {
     pub fn new<T>(
         ctx: &Context<T>,
         font: Font,
-        size: f32,
+        size: impl Into<f32>,
         style: Option<TextStyle>,
         locale: Option<&str>,
     ) -> Result<Self>
@@ -218,7 +218,7 @@ impl TextFormat {
                 style.weight.into(),
                 style.font_style.into(),
                 style.stretch.into(),
-                size,
+                size.into(),
                 &locale,
             )?
         };
@@ -268,6 +268,7 @@ pub struct TextLayout {
     layout: IDWriteTextLayout,
     format: TextFormat,
     typography: IDWriteTypography,
+    chars: Vec<char>,
     size: Size<f32>,
     _not_sync: UnsafeCell<()>,
 }
@@ -284,10 +285,11 @@ impl TextLayout {
         T: Backend,
     {
         let factory = &ctx.dwrite_factory;
-        let text = HSTRING::from(text.as_ref());
+        let text = text.as_ref();
+        let s = HSTRING::from(text);
         let layout = unsafe {
             factory.CreateTextLayout(
-                text.as_wide(),
+                s.as_wide(),
                 &format.format,
                 std::f32::MAX,
                 std::f32::MAX,
@@ -303,7 +305,7 @@ impl TextLayout {
                 &typography,
                 DWRITE_TEXT_RANGE {
                     startPosition: 0,
-                    length: text.as_wide().len() as u32,
+                    length: s.as_wide().len() as u32,
                 },
             )?;
             typography
@@ -326,6 +328,7 @@ impl TextLayout {
             layout,
             typography,
             format: format.clone(),
+            chars: text.chars().collect(),
             size,
             _not_sync: UnsafeCell::new(()),
         })
@@ -344,6 +347,28 @@ impl TextLayout {
     #[inline]
     pub fn alignment(&self) -> TextAlignment {
         unsafe { self.layout.GetTextAlignment().into() }
+    }
+
+    #[inline]
+    pub fn chars(&self) -> &[char] {
+        &self.chars
+    }
+
+    #[inline]
+    pub fn hit_test(&self, pt: impl Into<Point<f32>>) -> Result<HitTestResult> {
+        let pt: Point<f32> = pt.into();
+        let mut trailing_hit = BOOL::default();
+        let mut inside = BOOL::default();
+        let mut metrics = DWRITE_HIT_TEST_METRICS::default();
+        unsafe {
+            self.layout
+                .HitTestPoint(pt.x, pt.y, &mut trailing_hit, &mut inside, &mut metrics)?;
+        }
+        Ok(HitTestResult {
+            text_position: metrics.textPosition as usize,
+            inside: inside.as_bool(),
+            trailing_hit: trailing_hit.as_bool(),
+        })
     }
 
     pub(crate) fn handle(&self) -> &IDWriteTextLayout {
@@ -367,9 +392,17 @@ impl Clone for TextLayout {
             layout: self.layout.clone(),
             format: self.format.clone(),
             typography: self.typography.clone(),
+            chars: self.chars.clone(),
             size: self.size,
             _not_sync: UnsafeCell::new(()),
         }
+    }
+}
+
+impl ToString for TextLayout {
+    #[inline]
+    fn to_string(&self) -> String {
+        self.chars.iter().collect()
     }
 }
 
