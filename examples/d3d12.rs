@@ -154,7 +154,8 @@ fn main() -> anyhow::Result<()> {
                 cmd_list.Close()?;
                 cmd_queue.ExecuteCommandLists(&[Some(cmd_list.cast().unwrap())]);
                 ctx.draw(target, |cmd| {
-                    let yellow_green = pnte::SolidColorBrush::new(&ctx, (0.5, 0.8, 0.0, 1.0)).unwrap();
+                    let yellow_green =
+                        pnte::SolidColorBrush::new(&ctx, (0.5, 0.8, 0.0, 1.0)).unwrap();
                     let white = pnte::SolidColorBrush::new(&ctx, (1.0, 1.8, 1.0, 1.0)).unwrap();
                     cmd.fill(
                         &pnte::Rect::from_point_size((50.0, 50.0), (100.0, 100.0)),

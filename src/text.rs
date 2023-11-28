@@ -288,12 +288,7 @@ impl TextLayout {
         let text = text.as_ref();
         let s = HSTRING::from(text);
         let layout = unsafe {
-            factory.CreateTextLayout(
-                s.as_wide(),
-                &format.format,
-                std::f32::MAX,
-                std::f32::MAX,
-            )?
+            factory.CreateTextLayout(s.as_wide(), &format.format, std::f32::MAX, std::f32::MAX)?
         };
         let typography = unsafe {
             let typography = factory.CreateTypography()?;

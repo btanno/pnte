@@ -1,5 +1,5 @@
-use windows::Win32::System::Com::*;
 use wiard::ToLogical;
+use windows::Win32::System::Com::*;
 
 fn main() -> anyhow::Result<()> {
     unsafe {
@@ -51,10 +51,8 @@ fn main() -> anyhow::Result<()> {
                 if left_button {
                     let dpi = window.dpi().unwrap();
                     let mouse_position = m.mouse_state.position.to_logical(dpi as i32);
-                    let mouse_position = pnte::Point::new(
-                        mouse_position.x as f32,
-                        mouse_position.y as f32,
-                    );
+                    let mouse_position =
+                        pnte::Point::new(mouse_position.x as f32, mouse_position.y as f32);
                     let inside = pt_text.x <= mouse_position.x
                         && pt_text.y <= mouse_position.y
                         && pt_text.x + layout_size.width >= mouse_position.x
@@ -65,7 +63,10 @@ fn main() -> anyhow::Result<()> {
                             mouse_position.y - pt_text.y,
                         ))?;
                         if result.inside {
-                            hit_test_display = Some((text_layout.chars()[result.text_position], result.trailing_hit));
+                            hit_test_display = Some((
+                                text_layout.chars()[result.text_position],
+                                result.trailing_hit,
+                            ));
                         }
                     }
                 }
@@ -164,7 +165,11 @@ fn main() -> anyhow::Result<()> {
                     cmd.draw_text(&text_layout, pt_text, &white)?;
                     if let Some((c, trailing_hit)) = hit_test_display.as_ref() {
                         let pt_text = pnte::Point::new(pt_text.x, pt_text.y + 35.0);
-                        cmd.draw_text(&format!("{c}, trailing_hit = {trailing_hit}"), pt_text, &white)?;
+                        cmd.draw_text(
+                            &format!("{c}, trailing_hit = {trailing_hit}"),
+                            pt_text,
+                            &white,
+                        )?;
                     }
 
                     let pt = pnte::Point::new(pt.x + 230.0, 0.0);
