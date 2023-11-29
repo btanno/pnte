@@ -8,7 +8,7 @@ use windows::Win32::{
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct RenderTarget(ID2D1Bitmap1);
 
-impl Bitmap for RenderTarget {
+impl Target for RenderTarget {
     #[inline]
     fn bitmap(&self) -> &ID2D1Bitmap1 {
         &self.0

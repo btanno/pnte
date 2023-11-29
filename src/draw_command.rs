@@ -220,7 +220,7 @@ impl<'a, T: Backend> DrawCommand<'a, T> {
         let dc = &self.ctx.d2d1_device_context;
         unsafe {
             dc.DrawBitmap2(
-                image.bitmap(),
+                image.handle(),
                 Some(&dest),
                 opacity.unwrap_or(1.0),
                 interpolation.into(),

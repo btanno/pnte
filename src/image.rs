@@ -64,18 +64,9 @@ impl Image {
     pub fn pixel_size(&self) -> Size<u32> {
         unsafe { self.0.GetPixelSize().into() }
     }
-}
 
-impl Bitmap for Image {
-    fn bitmap(&self) -> &ID2D1Bitmap1 {
+    pub(crate) fn handle(&self) -> &ID2D1Bitmap1 {
         &self.0
     }
-
-    fn size(&self) -> Size<f32> {
-        self.size()
-    }
-
-    fn pixel_size(&self) -> Size<u32> {
-        self.pixel_size()
-    }
 }
+

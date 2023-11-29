@@ -42,7 +42,7 @@ impl RenderTarget {
     }
 }
 
-impl Bitmap for RenderTarget {
+impl Target for RenderTarget {
     fn bitmap(&self) -> &ID2D1Bitmap1 {
         self.render_target.as_ref().unwrap().bitmap()
     }

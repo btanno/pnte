@@ -12,7 +12,7 @@ pub struct RenderTarget {
     bitmap: ID2D1Bitmap1,
 }
 
-impl Bitmap for RenderTarget {
+impl Target for RenderTarget {
     #[inline]
     fn bitmap(&self) -> &ID2D1Bitmap1 {
         &self.bitmap

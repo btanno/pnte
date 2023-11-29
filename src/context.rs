@@ -18,14 +18,14 @@ use windows::Win32::{
     },
 };
 
-pub trait Bitmap {
+pub trait Target {
     fn bitmap(&self) -> &ID2D1Bitmap1;
     fn size(&self) -> Size<f32>;
     fn pixel_size(&self) -> Size<u32>;
 }
 
 pub trait Backend {
-    type RenderTarget: Bitmap;
+    type RenderTarget: Target;
 
     fn d2d1_factory(&self) -> &ID2D1Factory6;
     fn d2d1_device(&self) -> &ID2D1Device5;
