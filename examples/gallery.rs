@@ -63,10 +63,7 @@ fn main() -> anyhow::Result<()> {
                             mouse_position.y - pt_text.y,
                         ))?;
                         if result.inside {
-                            hit_test_display = Some((
-                                text_layout.chars()[result.text_position],
-                                result.trailing_hit,
-                            ));
+                            hit_test_display = Some((result.c, result.trailing_hit));
                         }
                     }
                 }
@@ -177,8 +174,6 @@ fn main() -> anyhow::Result<()> {
                     let pt = pnte::Point::new(pt.x, pt.y + 30.0);
                     cmd.fill(&pnte::Rect::from_point_size(pt, (60.0, 60.0)), &white);
 
-                    let pt = pnte::Point::new(pt.x, pt.y + 60.0 + 30.0);
-                    cmd.draw_text("fill circle", pt, &white)?;
                     let pt_circle = pnte::Point::new(pt.x + 30.0, pt.y + 30.0 + 30.0);
                     cmd.fill(&pnte::Circle::new(pt_circle, 30.0), &white);
 

@@ -182,6 +182,7 @@ pub struct TextStyle {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct HitTestResult {
+    pub c: char,
     pub text_position: usize,
     pub inside: bool,
     pub trailing_hit: bool,
@@ -366,8 +367,10 @@ impl TextLayout {
             self.layout
                 .HitTestPoint(pt.x, pt.y, &mut trailing_hit, &mut inside, &mut metrics)?;
         }
+        let text_position = metrics.textPosition as usize; 
         Ok(HitTestResult {
-            text_position: metrics.textPosition as usize,
+            c: self.chars[text_position],
+            text_position,
             inside: inside.as_bool(),
             trailing_hit: trailing_hit.as_bool(),
         })
