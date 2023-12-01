@@ -367,7 +367,7 @@ impl TextLayout {
             self.layout
                 .HitTestPoint(pt.x, pt.y, &mut trailing_hit, &mut inside, &mut metrics)?;
         }
-        let text_position = metrics.textPosition as usize; 
+        let text_position = metrics.textPosition as usize;
         Ok(HitTestResult {
             c: self.chars[text_position],
             text_position,
