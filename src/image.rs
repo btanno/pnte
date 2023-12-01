@@ -69,4 +69,3 @@ impl Image {
         &self.0
     }
 }
-
