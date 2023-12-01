@@ -195,10 +195,10 @@ impl<'a, T: Backend> DrawCommand<'a, T> {
         unsafe {
             let dc = &self.ctx.d2d1_device_context;
             let position: Point<f32> = position.into();
-            let format = TextFormat::from_handle(&self.ctx.default_text_format);
             dc.DrawTextLayout(
                 position.into(),
-                text.layout(self.ctx, &format)?.handle(),
+                text.layout(self.ctx, &self.ctx.default_text_format)?
+                    .handle(),
                 brush.handle(),
                 D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT | D2D1_DRAW_TEXT_OPTIONS_CLIP,
             );

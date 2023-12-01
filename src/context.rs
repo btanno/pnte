@@ -73,7 +73,7 @@ pub struct Context<T: Backend> {
     pub(crate) dwrite_factory: IDWriteFactory6,
     pub(crate) font_file_loader: Arc<FontFileLoader>,
     pub(crate) wic_imaging_factory: IWICImagingFactory2,
-    pub(crate) default_text_format: IDWriteTextFormat,
+    pub(crate) default_text_format: TextFormat,
 }
 
 impl<T> Context<T>
@@ -111,16 +111,16 @@ where
                 .iter()
                 .position(|c| *c == 0)
                 .unwrap_or(metrics.lfCaptionFont.lfFaceName.len());
-            let font_name =
-                HSTRING::from_wide(&metrics.lfCaptionFont.lfFaceName[..name_term]).unwrap();
-            dwrite_factory.CreateTextFormat(
-                &font_name,
+            let font_name = HSTRING::from_wide(&metrics.lfCaptionFont.lfFaceName[..name_term])
+                .unwrap()
+                .to_string_lossy();
+            TextFormat::new_impl(
+                &dwrite_factory,
+                &font_file_loader,
+                Font::System(&font_name),
+                FontPoint(14.0),
                 None,
-                DWRITE_FONT_WEIGHT_REGULAR,
-                DWRITE_FONT_STYLE_NORMAL,
-                DWRITE_FONT_STRETCH_MEDIUM,
-                FontPoint(14.0).into(),
-                &HSTRING::from(""),
+                None,
             )?
         };
         Ok(Self {
@@ -148,7 +148,7 @@ where
 
     #[inline]
     pub fn set_default_text_format(&mut self, format: &TextFormat) {
-        self.default_text_format = format.handle().clone();
+        self.default_text_format = format.clone();
     }
 
     #[inline]

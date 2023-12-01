@@ -1,5 +1,4 @@
 use crate::*;
-use std::cell::UnsafeCell;
 use windows::core::{ComInterface, HSTRING};
 use windows::Win32::{Foundation::BOOL, Graphics::DirectWrite::*};
 
@@ -188,10 +187,12 @@ pub struct HitTestResult {
     pub trailing_hit: bool,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TextFormat {
     format: IDWriteTextFormat,
-    _not_sync: UnsafeCell<()>, // !Sync
+    font_name: String,
+    size: f32,
+    style: TextStyle,
 }
 
 impl TextFormat {
@@ -207,9 +208,21 @@ impl TextFormat {
     {
         let factory = &ctx.dwrite_factory;
         let loader = &ctx.font_file_loader;
+        Self::new_impl(factory, loader, font, size, style, locale)
+    }
+
+    pub(crate) fn new_impl(
+        factory: &IDWriteFactory6,
+        loader: &FontFileLoader,
+        font: Font,
+        size: impl Into<f32>,
+        style: Option<TextStyle>,
+        locale: Option<&str>,
+    ) -> Result<Self> {
         let font_name = font.font_name();
         let font_collection = font.font_collection(factory, loader)?;
         let style = style.unwrap_or_default();
+        let size = size.into();
         let locale = HSTRING::from(locale.unwrap_or(""));
         let format = unsafe {
             factory.CreateTextFormat(
@@ -218,25 +231,31 @@ impl TextFormat {
                 style.weight.into(),
                 style.font_style.into(),
                 style.stretch.into(),
-                size.into(),
+                size,
                 &locale,
             )?
         };
         Ok(Self {
             format,
-            _not_sync: UnsafeCell::new(()),
+            font_name: font_name.into(),
+            size,
+            style,
         })
     }
 
-    pub(crate) fn from_handle(format: &IDWriteTextFormat) -> Self {
-        Self {
-            format: format.clone(),
-            _not_sync: UnsafeCell::new(()),
-        }
+    #[inline]
+    pub fn font_name(&self) -> &str {
+        &self.font_name
     }
 
-    pub(crate) fn handle(&self) -> &IDWriteTextFormat {
-        &self.format
+    #[inline]
+    pub fn size(&self) -> f32 {
+        self.size
+    }
+
+    #[inline]
+    pub fn style(&self) -> &TextStyle {
+        &self.style
     }
 }
 
@@ -249,28 +268,17 @@ impl PartialEq for TextFormat {
 
 impl Eq for TextFormat {}
 
-impl Clone for TextFormat {
-    #[inline]
-    fn clone(&self) -> Self {
-        Self {
-            format: self.format.clone(),
-            _not_sync: UnsafeCell::new(()),
-        }
-    }
-}
-
 pub trait Text {
     fn layout<T: Backend>(self, ctx: &Context<T>, format: &TextFormat) -> Result<TextLayout>;
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TextLayout {
     layout: IDWriteTextLayout,
     format: TextFormat,
-    typography: IDWriteTypography,
+    _typography: IDWriteTypography,
     chars: Vec<char>,
     size: Size<f32>,
-    _not_sync: UnsafeCell<()>,
 }
 
 impl TextLayout {
@@ -321,11 +329,10 @@ impl TextLayout {
         };
         Ok(Self {
             layout,
-            typography,
+            _typography: typography,
             format: format.clone(),
             chars: text.chars().collect(),
             size,
-            _not_sync: UnsafeCell::new(()),
         })
     }
 
@@ -379,20 +386,6 @@ impl PartialEq for TextLayout {
 }
 
 impl Eq for TextLayout {}
-
-impl Clone for TextLayout {
-    #[inline]
-    fn clone(&self) -> Self {
-        Self {
-            layout: self.layout.clone(),
-            format: self.format.clone(),
-            typography: self.typography.clone(),
-            chars: self.chars.clone(),
-            size: self.size,
-            _not_sync: UnsafeCell::new(()),
-        }
-    }
-}
 
 impl ToString for TextLayout {
     #[inline]
