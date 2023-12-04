@@ -13,8 +13,13 @@ fn main() -> anyhow::Result<()> {
     let mut ctx = pnte::Context::new(pnte::Direct2D::new()?)?;
     ctx.set_dpi(dpi, dpi);
     let render_target = ctx.create_render_target(&window, (size.width, size.height))?;
-    let text_format =
-        pnte::TextFormat::new(&ctx, pnte::Font::System("Yu Gothic UI"), 32.0, None, None)?;
+    let text_format = pnte::TextFormat::new(
+        &ctx,
+        pnte::Font::System("Yu Gothic UI"),
+        pnte::FontPoint(32.0),
+        None,
+        None,
+    )?;
     let text_layout = pnte::TextLayout::new(
         &ctx,
         "hello! 🚀",
