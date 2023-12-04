@@ -23,7 +23,8 @@ fn main() -> anyhow::Result<()> {
                     let white = pnte::SolidColorBrush::new(&ctx, (1.0, 1.0, 1.0, 1.0)).unwrap();
                     cmd.clear((0.0, 0.0, 0.3, 0.0));
                     cmd.draw_text("hello!!!", (10.0, 10.0), &white).unwrap();
-                }).unwrap();
+                })
+                .unwrap();
             }
             WindowEvent::CloseRequested => elwt.exit(),
             _ => {}
