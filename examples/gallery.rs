@@ -174,6 +174,8 @@ fn main() -> anyhow::Result<()> {
                     let pt = pnte::Point::new(pt.x, pt.y + 30.0);
                     cmd.fill(&pnte::Rect::from_point_size(pt, (60.0, 60.0)), &white);
 
+                    let pt = pnte::Point::new(pt.x, pt.y + 90.0);
+                    cmd.draw_text("fill circle", pt, &white)?;
                     let pt_circle = pnte::Point::new(pt.x + 30.0, pt.y + 30.0 + 30.0);
                     cmd.fill(&pnte::Circle::new(pt_circle, 30.0), &white);
 
