@@ -168,6 +168,10 @@ fn main() -> anyhow::Result<()> {
                             &white,
                         )?;
                     }
+                    let pt_text_caption = pnte::Point::new(pt_text.x, pt_text.y + 35.0 + 30.0);
+                    cmd.draw_text("accent", pt_text_caption, &white)?;
+                    let pt_text = pnte::Point::new(pt_text_caption.x, pt_text_caption.y + 30.0);
+                    cmd.draw_text("é à â ü ç", pt_text, &white)?;
 
                     let pt = pnte::Point::new(pt.x + 230.0, 0.0);
                     cmd.draw_text("fill rectangle", pt, &white)?;
