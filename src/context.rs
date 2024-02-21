@@ -85,20 +85,17 @@ where
             unsafe { DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED)? };
         let wic_imaging_factory =
             unsafe { CoCreateInstance(&CLSID_WICImagingFactory2, None, CLSCTX_INPROC_SERVER)? };
-        let font_file_loader = FontFileLoader::new(&dwrite_factory)?;
-        let default_text_format = TextFormat::new_impl(
-            &dwrite_factory,
-            &font_file_loader,
-            Font::System(""),
-            FontPoint(14.0),
-            None,
-            None,
-        )?;
+        let font_file_loader = Arc::new(FontFileLoader::new(&dwrite_factory)?);
+        let default_text_format =
+            TextFormatBuilder::new_private(&dwrite_factory, &font_file_loader)
+                .font(Font::System(""))
+                .size(FontPoint(14.0))
+                .build()?;
         Ok(Self {
             backend: Arc::new(backend),
             d2d1_device_context,
             dwrite_factory,
-            font_file_loader: Arc::new(font_file_loader),
+            font_file_loader,
             wic_imaging_factory,
             default_text_format,
         })
