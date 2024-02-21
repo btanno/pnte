@@ -13,20 +13,14 @@ fn main() -> anyhow::Result<()> {
     let mut ctx = pnte::Context::new(pnte::Direct2D::new()?)?;
     ctx.set_dpi(dpi, dpi);
     let render_target = ctx.create_render_target(&window, (size.width, size.height))?;
-    let text_format = pnte::TextFormat::new(
-        &ctx,
-        pnte::Font::System("Yu Gothic UI"),
-        pnte::FontPoint(32.0),
-        None,
-        None,
-    )?;
-    let text_layout = pnte::TextLayout::new(
-        &ctx,
-        "hello! 🚀",
-        &text_format,
-        pnte::TextAlignment::Center,
-        None,
-    )?;
+    let text_format = pnte::TextFormat::new(&ctx)
+        .font(pnte::Font::System("Yu Gothic UI"))
+        .size(pnte::FontPoint(32.0))
+        .build()?;
+    let text_layout = pnte::TextLayout::new(&ctx)
+        .text("hello! 🚀")
+        .format(&text_format)
+        .build()?;
     let white = pnte::SolidColorBrush::new(&ctx, (1.0, 1.0, 1.0, 1.0))?;
     loop {
         let Some((event, _)) = event_rx.recv() else {

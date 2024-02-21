@@ -18,25 +18,19 @@ fn main() -> anyhow::Result<()> {
     let image_size = image.size();
     let image_size = pnte::Size::new(image_size.width / 8.0, image_size.height / 8.0);
     let white = pnte::SolidColorBrush::new(&ctx, (1.0, 1.0, 1.0, 1.0))?;
-    let text_format = pnte::TextFormat::new(
-        &ctx,
-        pnte::Font::File(
+    let text_format = pnte::TextFormat::new(&ctx)
+        .font(pnte::Font::File(
             &std::path::Path::new(
                 "./assets/Inconsolata/static/Inconsolata/Inconsolata-Regular.ttf",
             ),
             "Inconsolata",
-        ),
-        pnte::FontPoint(25.0),
-        None,
-        None,
-    )?;
-    let text_layout = pnte::TextLayout::new(
-        &ctx,
-        "abcdefghijklmnopqrstuvwxyz",
-        &text_format,
-        pnte::TextAlignment::Center,
-        None,
-    )?;
+        ))
+        .size(pnte::FontPoint(25.0))
+        .build()?;
+    let text_layout = pnte::TextLayout::new(&ctx)
+        .text("abcdefghijklmnopqrstuvwxyz")
+        .format(&text_format)
+        .build()?;
     let pt_text = pnte::Point::new(10.0, 530.0);
     let layout_size = text_layout.size();
     let mut hit_test_display: Option<(char, bool)> = None;
