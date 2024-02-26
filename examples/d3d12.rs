@@ -1,4 +1,4 @@
-use windows::core::ComInterface;
+use windows::core::Interface;
 use windows::Win32::{
     Foundation::HWND, Graphics::Direct3D::*, Graphics::Direct3D12::*, Graphics::Dxgi::Common::*,
     Graphics::Dxgi::*, System::Com::*,

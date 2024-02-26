@@ -1,5 +1,5 @@
 use super::*;
-use windows::core::ComInterface;
+use windows::core::Interface;
 use windows::Win32::{
     Graphics::Direct2D::Common::*, Graphics::Direct2D::*, Graphics::Direct3D11::*,
     Graphics::Dxgi::*,
@@ -34,7 +34,7 @@ pub struct Direct3D11 {
 impl Direct3D11 {
     pub fn new<T>(d3d11_device: &T) -> Result<Self>
     where
-        T: ComInterface,
+        T: Interface,
     {
         let d3d11_device: ID3D11Device = d3d11_device.cast()?;
         let d2d1_factory: ID2D1Factory6 =
@@ -77,7 +77,7 @@ impl Direct3D11 {
 impl Context<Direct3D11> {
     pub fn create_render_target<T>(&self, target: &T) -> Result<RenderTarget>
     where
-        T: ComInterface,
+        T: Interface,
     {
         if let Ok(swap_chain) = target.cast::<IDXGISwapChain1>() {
             self.create_render_target_from_swap_chain(&swap_chain)

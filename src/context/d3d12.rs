@@ -1,5 +1,5 @@
 use super::*;
-use windows::core::{ComInterface, IUnknown};
+use windows::core::{Interface, IUnknown};
 use windows::Win32::{
     Foundation::E_FAIL, Graphics::Direct2D::Common::*, Graphics::Direct2D::*,
     Graphics::Direct3D11::*, Graphics::Direct3D11on12::*, Graphics::Direct3D12::*,
@@ -40,8 +40,8 @@ pub struct Direct3D12 {
 impl Direct3D12 {
     pub fn new<T, U>(d3d12_device: &T, command_queue: &U, nodemask: u32) -> Result<Self>
     where
-        T: ComInterface,
-        U: ComInterface,
+        T: Interface,
+        U: Interface,
     {
         let d3d12_device: ID3D12Device = d3d12_device.cast()?;
         let command_queue: ID3D12CommandQueue = command_queue.cast()?;
@@ -82,7 +82,7 @@ impl Direct3D12 {
 impl Context<Direct3D12> {
     pub fn create_render_target<T>(&self, target: &T) -> Result<RenderTarget>
     where
-        T: ComInterface,
+        T: Interface,
     {
         unsafe {
             let resource: ID3D12Resource = target.cast()?;
