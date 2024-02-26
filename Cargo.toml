@@ -1,6 +1,6 @@
 [package]
 name = "pnte"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "2D Graphics library for Windows in Rust"
 repository = "https://github.com/btanno/pnte"
