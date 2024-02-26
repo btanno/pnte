@@ -1,5 +1,5 @@
 use crate::*;
-use windows::core::ComInterface;
+use windows::core::Interface;
 use windows::Win32::Graphics::{Direct2D::Common::*, Direct2D::*};
 
 pub trait Brush {

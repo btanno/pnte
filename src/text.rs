@@ -1,6 +1,6 @@
 use crate::*;
 use std::sync::Arc;
-use windows::core::{ComInterface, HSTRING};
+use windows::core::{Interface, HSTRING};
 use windows::Win32::{Foundation::BOOL, Graphics::DirectWrite::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
