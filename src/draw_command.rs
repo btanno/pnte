@@ -11,7 +11,7 @@ pub trait Stroke {
         dc: &ID2D1DeviceContext5,
         brush: &ID2D1Brush,
         width: f32,
-        style: Option<&ID2D1StrokeStyle>,
+        style: Option<&ID2D1StrokeStyle1>,
     );
 }
 
@@ -117,7 +117,7 @@ impl<'a> Default for StrokeStyleProperties<'a> {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct StrokeStyle(ID2D1StrokeStyle);
+pub struct StrokeStyle(ID2D1StrokeStyle1);
 
 impl StrokeStyle {
     pub fn new<T>(ctx: &Context<T>, props: &StrokeStyleProperties) -> Result<Self>
@@ -132,7 +132,7 @@ impl StrokeStyle {
             }
             None => (D2D1_CAP_STYLE_FLAT, D2D1_DASH_STYLE_SOLID, 0.0, None),
         };
-        let props = D2D1_STROKE_STYLE_PROPERTIES {
+        let props = D2D1_STROKE_STYLE_PROPERTIES1 {
             startCap: props.start_cap.into(),
             endCap: props.end_cap.into(),
             dashCap: dash_cap,
@@ -140,6 +140,7 @@ impl StrokeStyle {
             miterLimit: miter_limit,
             dashStyle: dash_style,
             dashOffset: dash_offset,
+            transformType: D2D1_STROKE_TRANSFORM_TYPE_NORMAL,
         };
         let handle = unsafe {
             ctx.backend
@@ -200,6 +201,8 @@ impl<'a, T: Backend> DrawCommand<'a, T> {
                 text.layout(self.ctx, &self.ctx.default_text_format)?
                     .handle(),
                 brush.handle(),
+                None,
+                0,
                 D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT | D2D1_DRAW_TEXT_OPTIONS_CLIP,
             );
         }
@@ -219,7 +222,7 @@ impl<'a, T: Backend> DrawCommand<'a, T> {
         let dest = D2D_RECT_F::from(dest_rect.into());
         let dc = &self.ctx.d2d1_device_context;
         unsafe {
-            dc.DrawBitmap2(
+            dc.DrawBitmap(
                 image.handle(),
                 Some(&dest),
                 opacity.unwrap_or(1.0),

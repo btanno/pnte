@@ -3,88 +3,19 @@ use std::sync::Arc;
 use windows::core::{Interface, HSTRING};
 use windows::Win32::{Foundation::BOOL, Graphics::DirectWrite::*};
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(i32)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum FontWeight {
-    Thin = DWRITE_FONT_WEIGHT_THIN.0,
-    UltraLight = DWRITE_FONT_WEIGHT_ULTRA_LIGHT.0,
-    Light = DWRITE_FONT_WEIGHT_LIGHT.0,
-    SemiLight = DWRITE_FONT_WEIGHT_SEMI_LIGHT.0,
-    Regular = DWRITE_FONT_WEIGHT_REGULAR.0,
-    Medium = DWRITE_FONT_WEIGHT_MEDIUM.0,
-    SemiBold = DWRITE_FONT_WEIGHT_SEMI_BOLD.0,
-    Bold = DWRITE_FONT_WEIGHT_BOLD.0,
-    UltraBold = DWRITE_FONT_WEIGHT_ULTRA_BOLD.0,
-    Heavy = DWRITE_FONT_WEIGHT_HEAVY.0,
-    UltraBlack = DWRITE_FONT_WEIGHT_ULTRA_BLACK.0,
-}
+pub enum FontWeight {}
 
-impl Default for FontWeight {
-    #[inline]
-    fn default() -> Self {
-        Self::Regular
-    }
-}
-
-impl From<FontWeight> for DWRITE_FONT_WEIGHT {
-    #[inline]
-    fn from(value: FontWeight) -> Self {
-        Self(value as i32)
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(i32)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum FontStyle {
-    Normal = DWRITE_FONT_STYLE_NORMAL.0,
-    Oblique = DWRITE_FONT_STYLE_OBLIQUE.0,
-    Italic = DWRITE_FONT_STYLE_ITALIC.0,
-}
-
-impl Default for FontStyle {
-    #[inline]
-    fn default() -> Self {
-        Self::Normal
-    }
-}
-
-impl From<FontStyle> for DWRITE_FONT_STYLE {
-    #[inline]
-    fn from(value: FontStyle) -> Self {
-        Self(value as i32)
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(i32)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum FontStretch {
-    Undefined = DWRITE_FONT_STRETCH_UNDEFINED.0,
-    UltraCondensed = DWRITE_FONT_STRETCH_ULTRA_CONDENSED.0,
-    ExtraCondensed = DWRITE_FONT_STRETCH_EXTRA_CONDENSED.0,
-    Condensed = DWRITE_FONT_STRETCH_CONDENSED.0,
-    SemiCondensed = DWRITE_FONT_STRETCH_SEMI_CONDENSED.0,
-    Medium = DWRITE_FONT_STRETCH_MEDIUM.0,
-    SemiExpanded = DWRITE_FONT_STRETCH_SEMI_EXPANDED.0,
-    Expanded = DWRITE_FONT_STRETCH_EXPANDED.0,
-    ExtraExpanded = DWRITE_FONT_STRETCH_EXTRA_EXPANDED.0,
-    UltraExpanded = DWRITE_FONT_STRETCH_ULTRA_EXPANDED.0,
-}
-
-impl Default for FontStretch {
-    #[inline]
-    fn default() -> Self {
-        Self::Medium
-    }
-}
-
-impl From<FontStretch> for DWRITE_FONT_STRETCH {
-    #[inline]
-    fn from(value: FontStretch) -> Self {
-        Self(value as i32)
-    }
+impl FontWeight {
+    pub const THIN: f32 = DWRITE_FONT_WEIGHT_THIN.0 as f32;
+    pub const ULTRA_LIGHT: f32 = DWRITE_FONT_WEIGHT_ULTRA_LIGHT.0 as f32;
+    pub const LIGHT: f32 = DWRITE_FONT_WEIGHT_LIGHT.0 as f32;
+    pub const SEMI_LIGHT: f32 = DWRITE_FONT_WEIGHT_SEMI_LIGHT.0 as f32;
+    pub const REGULAR: f32 = DWRITE_FONT_WEIGHT_REGULAR.0 as f32;
+    pub const MEDIUM: f32 = DWRITE_FONT_WEIGHT_MEDIUM.0 as f32;
+    pub const SEMI_BOLD: f32 = DWRITE_FONT_WEIGHT_SEMI_BOLD.0 as f32;
+    pub const ULTRA_BOLD: f32 = DWRITE_FONT_WEIGHT_ULTRA_BOLD.0 as f32;
+    pub const HEAVY: f32 = DWRITE_FONT_WEIGHT_HEAVY.0 as f32;
+    pub const ULTRA_BLACK: f32 = DWRITE_FONT_WEIGHT_ULTRA_BLACK.0 as f32;
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -341,7 +272,8 @@ impl<'a, 'b> Font<'a, 'b> {
             };
             set_builder.AddFontFile(&font_file)?;
             let font_set = set_builder.CreateFontSet()?;
-            let font_collection = factory.CreateFontCollectionFromFontSet(&font_set)?;
+            let font_collection = factory
+                .CreateFontCollectionFromFontSet(&font_set, DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC)?;
             Ok(Some(font_collection.cast().unwrap()))
         }
     }
@@ -357,13 +289,6 @@ impl From<FontPoint> for f32 {
     }
 }
 
-#[derive(Clone, Copy, Default, Debug)]
-pub struct TextStyle {
-    pub weight: FontWeight,
-    pub font_style: FontStyle,
-    pub stretch: FontStretch,
-}
-
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct HitTestResult {
     pub c: char,
@@ -377,9 +302,10 @@ pub struct TextFormatBuilder<'a, F = (), S = ()> {
     loader: Arc<FontFileLoader>,
     font: F,
     size: S,
-    weight: FontWeight,
-    font_style: FontStyle,
-    stretch: FontStretch,
+    weight: f32,
+    width: f32,
+    slant: f32,
+    italic: bool,
     locale: Option<&'a str>,
 }
 
@@ -390,9 +316,10 @@ impl<'a> TextFormatBuilder<'a, (), ()> {
             loader: ctx.font_file_loader.clone(),
             font: (),
             size: (),
-            weight: Default::default(),
-            font_style: Default::default(),
-            stretch: Default::default(),
+            weight: FontWeight::REGULAR,
+            width: 100.0,
+            slant: 0.0,
+            italic: false,
             locale: None,
         }
     }
@@ -403,9 +330,10 @@ impl<'a> TextFormatBuilder<'a, (), ()> {
             loader: loader.clone(),
             font: (),
             size: (),
-            weight: Default::default(),
-            font_style: Default::default(),
-            stretch: Default::default(),
+            weight: FontWeight::REGULAR,
+            width: 100.0,
+            slant: 0.0,
+            italic: false,
             locale: None,
         }
     }
@@ -420,8 +348,9 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
             font,
             size: self.size,
             weight: self.weight,
-            font_style: self.font_style,
-            stretch: self.stretch,
+            width: self.width,
+            slant: self.slant,
+            italic: self.italic,
             locale: self.locale,
         }
     }
@@ -434,27 +363,37 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
             font: self.font,
             size: size.into(),
             weight: self.weight,
-            font_style: self.font_style,
-            stretch: self.stretch,
+            width: self.width,
+            slant: self.slant,
+            italic: self.italic,
             locale: self.locale,
         }
     }
 
     #[inline]
-    pub fn weight(mut self, weight: FontWeight) -> Self {
+    pub fn weight(mut self, weight: f32) -> Self {
+        assert!(weight >= 1.0 && weight <= 1000.0);
         self.weight = weight;
         self
     }
 
     #[inline]
-    pub fn font_style(mut self, font_style: FontStyle) -> Self {
-        self.font_style = font_style;
+    pub fn width(mut self, width: f32) -> Self {
+        assert!(width > 0.0);
+        self.width = width;
         self
     }
 
     #[inline]
-    pub fn stretch(mut self, stretch: FontStretch) -> Self {
-        self.stretch = stretch;
+    pub fn slant(mut self, slant: f32) -> Self {
+        assert!(slant >= -90.0 && slant <= 90.0);
+        self.slant = slant;
+        self
+    }
+
+    #[inline]
+    pub fn italic(mut self, italic: bool) -> Self {
+        self.italic = italic;
         self
     }
 
@@ -471,13 +410,29 @@ impl<'a, 'b, 'c> TextFormatBuilder<'a, Font<'b, 'c>, f32> {
         let font_name = self.font.font_name();
         let font_collection = self.font.font_collection(&self.factory, &self.loader)?;
         let locale = HSTRING::from(self.locale.unwrap_or(""));
+        let axis_values = [
+            DWRITE_FONT_AXIS_VALUE {
+                axisTag: DWRITE_FONT_AXIS_TAG_WEIGHT,
+                value: self.weight,
+            },
+            DWRITE_FONT_AXIS_VALUE {
+                axisTag: DWRITE_FONT_AXIS_TAG_WIDTH,
+                value: self.width,
+            },
+            DWRITE_FONT_AXIS_VALUE {
+                axisTag: DWRITE_FONT_AXIS_TAG_SLANT,
+                value: self.slant,
+            },
+            DWRITE_FONT_AXIS_VALUE {
+                axisTag: DWRITE_FONT_AXIS_TAG_ITALIC,
+                value: self.italic.then_some(1.0f32).unwrap_or(0.0),
+            },
+        ];
         let format = unsafe {
             self.factory.CreateTextFormat(
                 &HSTRING::from(font_name),
                 font_collection.as_ref(),
-                self.weight.into(),
-                self.font_style.into(),
-                self.stretch.into(),
+                &axis_values,
                 self.size.into(),
                 &locale,
             )?
@@ -487,20 +442,22 @@ impl<'a, 'b, 'c> TextFormatBuilder<'a, Font<'b, 'c>, f32> {
             font_name: font_name.into(),
             size: self.size,
             weight: self.weight,
-            font_style: self.font_style,
-            stretch: self.stretch,
+            width: self.width,
+            slant: self.slant,
+            italic: self.italic,
         })
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct TextFormat {
-    format: IDWriteTextFormat,
+    format: IDWriteTextFormat3,
     font_name: String,
     size: f32,
-    weight: FontWeight,
-    font_style: FontStyle,
-    stretch: FontStretch,
+    weight: f32,
+    width: f32,
+    slant: f32,
+    italic: bool,
 }
 
 impl TextFormat {
@@ -520,18 +477,23 @@ impl TextFormat {
     }
 
     #[inline]
-    pub fn weight(&self) -> FontWeight {
+    pub fn weight(&self) -> f32 {
         self.weight
     }
 
     #[inline]
-    pub fn font_style(&self) -> FontStyle {
-        self.font_style
+    pub fn width(&self) -> f32 {
+        self.width
     }
 
     #[inline]
-    pub fn stretch(&self) -> FontStretch {
-        self.stretch
+    pub fn slant(&self) -> f32 {
+        self.slant
+    }
+
+    #[inline]
+    pub fn italic(&self) -> bool {
+        self.italic
     }
 }
 
@@ -671,13 +633,13 @@ where
         unsafe {
             layout.SetTextAlignment(self.alignment.into())?;
             layout.SetParagraphAlignment(self.paragraph_alignment.into())?;
-            layout.SetLineSpacing2(&self.line_spacing.into())?;
+            layout.SetLineSpacing(&self.line_spacing.into())?;
         }
         let size = unsafe {
             let size = self.size.unwrap_or_else(|| {
-                let mut metrics = DWRITE_TEXT_METRICS::default();
+                let mut metrics = DWRITE_TEXT_METRICS1::default();
                 layout.GetMetrics(&mut metrics).unwrap();
-                (metrics.width, metrics.height).into()
+                (metrics.Base.width, metrics.Base.height).into()
             });
             layout.SetMaxWidth(size.width)?;
             layout.SetMaxHeight(size.height)?;
@@ -735,7 +697,7 @@ impl TextLayout {
     pub fn line_spacing(&self) -> LineSpacing {
         unsafe {
             let mut line_spacing = Default::default();
-            self.layout.GetLineSpacing2(&mut line_spacing).ok();
+            self.layout.GetLineSpacing(&mut line_spacing).ok();
             line_spacing.into()
         }
     }

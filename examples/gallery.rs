@@ -187,7 +187,6 @@ fn main() -> anyhow::Result<()> {
                         &ctx,
                         pt,
                         (pt.x + 60.0, pt.y),
-                        pnte::Gamma::G22,
                         pnte::GradientMode::Clamp,
                         &[
                             pnte::GradientStop::new(0.0, (1.0, 0.0, 0.0, 1.0)),
@@ -206,7 +205,6 @@ fn main() -> anyhow::Result<()> {
                         &ctx,
                         pnte::Circle::new((pt.x + 30.0, pt.y + 30.0), 30.0).to_ellipse(),
                         (0.0, 0.0),
-                        pnte::Gamma::G22,
                         pnte::GradientMode::Clamp,
                         &[
                             pnte::GradientStop::new(0.0, (1.0, 0.0, 0.0, 1.0)),

@@ -178,7 +178,10 @@ impl Path {
             sink.BeginFigure(start.into(), D2D1_FIGURE_BEGIN_FILLED);
             sink.SetFillMode(D2D1_FILL_MODE_WINDING);
         }
-        Ok(PathBuilder { geometry, sink })
+        Ok(PathBuilder {
+            geometry: geometry.into(),
+            sink,
+        })
     }
 }
 
@@ -198,10 +201,10 @@ impl Stroke for Path {
         dc: &ID2D1DeviceContext5,
         brush: &ID2D1Brush,
         width: f32,
-        style: Option<&ID2D1StrokeStyle>,
+        style: Option<&ID2D1StrokeStyle1>,
     ) {
         unsafe {
-            dc.DrawGeometry(&self.0, brush, width, style);
+            dc.DrawGeometry(&self.0, brush, width, style.map(|s| s.into()));
         }
     }
 }

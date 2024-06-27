@@ -1,5 +1,5 @@
 use super::*;
-use windows::core::{Interface, IUnknown};
+use windows::core::{IUnknown, Interface};
 use windows::Win32::{
     Foundation::E_FAIL, Graphics::Direct2D::Common::*, Graphics::Direct2D::*,
     Graphics::Direct3D11::*, Graphics::Direct3D11on12::*, Graphics::Direct3D12::*,
@@ -69,7 +69,7 @@ impl Direct3D12 {
         let d2d1_factory: ID2D1Factory6 =
             unsafe { D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, None)? };
         let dxgi_device: IDXGIDevice = d3d11on12_device.cast()?;
-        let d2d1_device = unsafe { d2d1_factory.CreateDevice6(&dxgi_device)? };
+        let d2d1_device = unsafe { d2d1_factory.CreateDevice(&dxgi_device)? };
         Ok(Self {
             d3d11on12_device,
             d2d1_factory,

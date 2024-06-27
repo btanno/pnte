@@ -78,21 +78,6 @@ pub enum GradientMode {
     Wrap = D2D1_EXTEND_MODE_WRAP.0,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(i32)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Gamma {
-    G22 = D2D1_GAMMA_2_2.0,
-    G10 = D2D1_GAMMA_1_0.0,
-}
-
-impl Default for Gamma {
-    #[inline]
-    fn default() -> Self {
-        Self::G22
-    }
-}
-
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct LinearGradientBrush(ID2D1Brush);
 
@@ -102,7 +87,6 @@ impl LinearGradientBrush {
         ctx: &Context<T>,
         start: impl Into<Point<f32>>,
         end: impl Into<Point<f32>>,
-        gamma: Gamma,
         mode: GradientMode,
         stops: &[G],
     ) -> Result<Self>
@@ -119,8 +103,11 @@ impl LinearGradientBrush {
         let stops = unsafe {
             dc.CreateGradientStopCollection(
                 &stops,
-                D2D1_GAMMA(gamma as i32),
+                D2D1_COLOR_SPACE_SRGB,
+                D2D1_COLOR_SPACE_SRGB,
+                D2D1_BUFFER_PRECISION_8BPC_UNORM,
                 D2D1_EXTEND_MODE(mode as i32),
+                D2D1_COLOR_INTERPOLATION_MODE_PREMULTIPLIED,
             )?
         };
         let brush = unsafe {
@@ -153,7 +140,6 @@ impl RadialGradientBrush {
         ctx: &Context<T>,
         ellipse: impl Into<Ellipse>,
         offset: impl Into<Vector<f32>>,
-        gamma: Gamma,
         mode: GradientMode,
         stops: &[G],
     ) -> Result<Self>
@@ -170,8 +156,11 @@ impl RadialGradientBrush {
         let stops = unsafe {
             dc.CreateGradientStopCollection(
                 &stops,
-                D2D1_GAMMA(gamma as i32),
+                D2D1_COLOR_SPACE_SRGB,
+                D2D1_COLOR_SPACE_SRGB,
+                D2D1_BUFFER_PRECISION_8BPC_UNORM,
                 D2D1_EXTEND_MODE(mode as i32),
+                D2D1_COLOR_INTERPOLATION_MODE_PREMULTIPLIED,
             )?
         };
         let ellipse: Ellipse = ellipse.into();
