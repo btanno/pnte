@@ -17,10 +17,10 @@ impl Stroke for Rect<f32> {
         dc: &ID2D1DeviceContext5,
         brush: &ID2D1Brush,
         width: f32,
-        style: Option<&ID2D1StrokeStyle>,
+        style: Option<&ID2D1StrokeStyle1>,
     ) {
         unsafe {
-            dc.DrawRectangle(&(*self).into(), brush, width, style);
+            dc.DrawRectangle(&(*self).into(), brush, width, style.map(|s| s.into()));
         }
     }
 }
@@ -44,10 +44,16 @@ impl Stroke for Line {
         dc: &ID2D1DeviceContext5,
         brush: &ID2D1Brush,
         width: f32,
-        style: Option<&ID2D1StrokeStyle>,
+        style: Option<&ID2D1StrokeStyle1>,
     ) {
         unsafe {
-            dc.DrawLine(self.0.into(), self.1.into(), brush, width, style);
+            dc.DrawLine(
+                self.0.into(),
+                self.1.into(),
+                brush,
+                width,
+                style.map(|s| s.into()),
+            );
         }
     }
 }
@@ -99,10 +105,10 @@ impl Stroke for RoundedRect {
         dc: &ID2D1DeviceContext5,
         brush: &ID2D1Brush,
         width: f32,
-        style: Option<&ID2D1StrokeStyle>,
+        style: Option<&ID2D1StrokeStyle1>,
     ) {
         unsafe {
-            dc.DrawRoundedRectangle(&(*self).into(), brush, width, style);
+            dc.DrawRoundedRectangle(&(*self).into(), brush, width, style.map(|s| s.into()));
         }
     }
 }
@@ -150,10 +156,15 @@ impl Stroke for Circle {
         dc: &ID2D1DeviceContext5,
         brush: &ID2D1Brush,
         width: f32,
-        style: Option<&ID2D1StrokeStyle>,
+        style: Option<&ID2D1StrokeStyle1>,
     ) {
         unsafe {
-            dc.DrawEllipse(&self.to_ellipse().into(), brush, width, style);
+            dc.DrawEllipse(
+                &self.to_ellipse().into(),
+                brush,
+                width,
+                style.map(|s| s.into()),
+            );
         }
     }
 }
@@ -205,10 +216,10 @@ impl Stroke for Ellipse {
         dc: &ID2D1DeviceContext5,
         brush: &ID2D1Brush,
         width: f32,
-        style: Option<&ID2D1StrokeStyle>,
+        style: Option<&ID2D1StrokeStyle1>,
     ) {
         unsafe {
-            dc.DrawEllipse(&(*self).into(), brush, width, style);
+            dc.DrawEllipse(&(*self).into(), brush, width, style.map(|s| s.into()));
         }
     }
 }

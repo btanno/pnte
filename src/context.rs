@@ -77,7 +77,7 @@ where
     #[inline]
     pub fn new(backend: T) -> Result<Self> {
         let d2d1_device_context = unsafe {
-            backend.d2d1_device().CreateDeviceContext6(
+            backend.d2d1_device().CreateDeviceContext(
                 D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
             )?
         };

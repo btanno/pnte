@@ -40,7 +40,7 @@ impl Direct3D11 {
         let d2d1_factory: ID2D1Factory6 =
             unsafe { D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, None)? };
         let dxgi_device: IDXGIDevice = d3d11_device.cast()?;
-        let d2d1_device: ID2D1Device5 = unsafe { d2d1_factory.CreateDevice6(&dxgi_device)? };
+        let d2d1_device: ID2D1Device5 = unsafe { d2d1_factory.CreateDevice(&dxgi_device)? };
         Ok(Self {
             d2d1_factory,
             d2d1_device,
