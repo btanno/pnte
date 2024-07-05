@@ -1,5 +1,6 @@
 mod brush;
 mod color;
+mod com;
 mod context;
 mod draw_command;
 mod error;
@@ -11,6 +12,7 @@ mod text;
 
 pub use brush::*;
 pub use color::*;
+pub use com::*;
 pub use context::*;
 pub use draw_command::*;
 pub use error::*;

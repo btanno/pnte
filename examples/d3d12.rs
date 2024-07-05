@@ -1,13 +1,11 @@
 use windows::core::Interface;
 use windows::Win32::{
     Foundation::HWND, Graphics::Direct3D::*, Graphics::Direct3D12::*, Graphics::Dxgi::Common::*,
-    Graphics::Dxgi::*, System::Com::*,
+    Graphics::Dxgi::*,
 };
 
 fn main() -> anyhow::Result<()> {
-    unsafe {
-        CoInitializeEx(None, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE).unwrap();
-    }
+    pnte::co_initialize(pnte::CoInit::ApartmentThreaded)?;
     unsafe {
         let debug = {
             let mut p: Option<ID3D12Debug> = None;
