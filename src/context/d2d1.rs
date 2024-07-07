@@ -26,8 +26,13 @@ impl RenderTarget {
         let size: Size<u32> = size.into();
         self.render_target = None;
         unsafe {
-            self.swap_chain
-                .ResizeBuffers(0, size.width, size.height, DXGI_FORMAT_UNKNOWN, 0)?;
+            self.swap_chain.ResizeBuffers(
+                0,
+                size.width,
+                size.height,
+                DXGI_FORMAT_UNKNOWN,
+                DXGI_SWAP_CHAIN_FLAG(0),
+            )?;
         }
         self.render_target = Some(
             self.ctx
@@ -113,7 +118,7 @@ impl Context<Direct2D> {
         else {
             panic!("no support the window handle.");
         };
-        let hwnd = HWND(window.hwnd.into());
+        let hwnd = HWND(isize::from(window.hwnd) as *mut std::ffi::c_void);
         unsafe {
             let swap_chain = self.backend.dxgi_factory.CreateSwapChainForHwnd(
                 &self.backend.d3d11_device,
@@ -171,7 +176,7 @@ impl Backend for Direct2D {
             let params = DXGI_PRESENT_PARAMETERS::default();
             target
                 .swap_chain
-                .Present1(target.interval, 0, &params)
+                .Present1(target.interval, DXGI_PRESENT(0), &params)
                 .ok()?;
         }
         Ok(())

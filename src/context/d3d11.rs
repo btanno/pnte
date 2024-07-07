@@ -53,8 +53,7 @@ impl Direct3D11 {
         swap_chain: &IDXGISwapChain1,
     ) -> Result<RenderTarget> {
         unsafe {
-            let mut desc = DXGI_SWAP_CHAIN_DESC1::default();
-            swap_chain.GetDesc1(&mut desc)?;
+            let desc = swap_chain.GetDesc1()?;
             let surface: IDXGISurface = swap_chain.GetBuffer(0)?;
             let bitmap = ctx.CreateBitmapFromDxgiSurface(
                 &surface,

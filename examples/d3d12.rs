@@ -161,7 +161,7 @@ fn main() -> anyhow::Result<()> {
                     );
                     cmd.draw_text("hello!!!", (200.0, 50.0), &white).ok();
                 })?;
-                swap_chain.Present(0, 0).ok()?;
+                swap_chain.Present(0, DXGI_PRESENT(0)).ok()?;
                 let frame = next_frame;
                 next_frame += 1;
                 cmd_queue.Signal(&fence, frame)?;
