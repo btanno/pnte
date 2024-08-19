@@ -300,7 +300,7 @@ pub struct HitTestResult {
 pub struct TextFormatBuilder<'a, F = (), S = ()> {
     factory: IDWriteFactory6,
     loader: Arc<FontFileLoader>,
-    font: F,
+    fnt: F,
     size: S,
     weight: f32,
     width: f32,
@@ -314,7 +314,7 @@ impl<'a> TextFormatBuilder<'a, (), ()> {
         Self {
             factory: ctx.dwrite_factory.clone(),
             loader: ctx.font_file_loader.clone(),
-            font: (),
+            fnt: (),
             size: (),
             weight: FontWeight::REGULAR,
             width: 100.0,
@@ -328,7 +328,7 @@ impl<'a> TextFormatBuilder<'a, (), ()> {
         Self {
             factory: factory.clone(),
             loader: loader.clone(),
-            font: (),
+            fnt: (),
             size: (),
             weight: FontWeight::REGULAR,
             width: 100.0,
@@ -345,7 +345,7 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
         TextFormatBuilder {
             factory: self.factory,
             loader: self.loader,
-            font,
+            fnt: font,
             size: self.size,
             weight: self.weight,
             width: self.width,
@@ -360,7 +360,7 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
         TextFormatBuilder {
             factory: self.factory,
             loader: self.loader,
-            font: self.font,
+            fnt: self.fnt,
             size: size.into(),
             weight: self.weight,
             width: self.width,
@@ -372,7 +372,7 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
 
     #[inline]
     pub fn weight(mut self, weight: f32) -> Self {
-        assert!(weight >= 1.0 && weight <= 1000.0);
+        assert!((1.0..=1000.0).contains(&weight));
         self.weight = weight;
         self
     }
@@ -386,7 +386,7 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
 
     #[inline]
     pub fn slant(mut self, slant: f32) -> Self {
-        assert!(slant >= -90.0 && slant <= 90.0);
+        assert!((-90.0..=90.0).contains(&slant));
         self.slant = slant;
         self
     }
@@ -407,8 +407,8 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
 impl<'a, 'b, 'c> TextFormatBuilder<'a, Font<'b, 'c>, f32> {
     #[inline]
     pub fn build(self) -> Result<TextFormat> {
-        let font_name = self.font.font_name();
-        let font_collection = self.font.font_collection(&self.factory, &self.loader)?;
+        let font_name = self.fnt.font_name();
+        let font_collection = self.fnt.font_collection(&self.factory, &self.loader)?;
         let locale = HSTRING::from(self.locale.unwrap_or(""));
         let axis_values = [
             DWRITE_FONT_AXIS_VALUE {
@@ -425,7 +425,7 @@ impl<'a, 'b, 'c> TextFormatBuilder<'a, Font<'b, 'c>, f32> {
             },
             DWRITE_FONT_AXIS_VALUE {
                 axisTag: DWRITE_FONT_AXIS_TAG_ITALIC,
-                value: self.italic.then_some(1.0f32).unwrap_or(0.0),
+                value: if self.italic { 1.0f32 } else { 0.0 },
             },
         ];
         let format = unsafe {
@@ -433,7 +433,7 @@ impl<'a, 'b, 'c> TextFormatBuilder<'a, Font<'b, 'c>, f32> {
                 &HSTRING::from(font_name),
                 font_collection.as_ref(),
                 &axis_values,
-                self.size.into(),
+                self.size,
                 &locale,
             )?
         };
@@ -462,6 +462,7 @@ pub struct TextFormat {
 
 impl TextFormat {
     #[inline]
+    #[allow(clippy::new_ret_no_self)]
     pub fn new<'a, T: Backend>(ctx: &Context<T>) -> TextFormatBuilder<'a> {
         TextFormatBuilder::new(ctx)
     }
@@ -515,7 +516,7 @@ where
     T: Backend,
 {
     ctx: &'a Context<T>,
-    text: Txt,
+    txt: Txt,
     format: Fmt,
     alignment: TextAlignment,
     paragraph_alignment: ParagraphAlignment,
@@ -530,7 +531,7 @@ where
     fn new(ctx: &'a Context<T>) -> Self {
         Self {
             ctx,
-            text: (),
+            txt: (),
             format: (),
             alignment: TextAlignment::Center,
             paragraph_alignment: ParagraphAlignment::Center,
@@ -548,7 +549,7 @@ where
     pub fn text<'b>(self, text: &'b str) -> TextLayoutBuilder<'a, T, &'b str, Fmt> {
         TextLayoutBuilder {
             ctx: self.ctx,
-            text,
+            txt: text,
             format: self.format,
             alignment: self.alignment,
             paragraph_alignment: self.paragraph_alignment,
@@ -564,7 +565,7 @@ where
     ) -> TextLayoutBuilder<'a, T, Txt, &'b TextFormat> {
         TextLayoutBuilder {
             ctx: self.ctx,
-            text: self.text,
+            txt: self.txt,
             format,
             alignment: self.alignment,
             paragraph_alignment: self.paragraph_alignment,
@@ -604,14 +605,14 @@ where
 {
     pub fn build(self) -> Result<TextLayout> {
         let factory = &self.ctx.dwrite_factory;
-        let s = HSTRING::from(self.text);
+        let s = HSTRING::from(self.txt);
         let layout: IDWriteTextLayout3 = unsafe {
             factory
                 .CreateTextLayout(
                     s.as_wide(),
                     &self.format.format,
-                    std::f32::MAX,
-                    std::f32::MAX,
+                    f32::MAX,
+                    f32::MAX,
                 )?
                 .cast()?
         };
@@ -649,7 +650,7 @@ where
             layout,
             _typography: typography,
             format: self.format.clone(),
-            chars: self.text.chars().collect(),
+            chars: self.txt.chars().collect(),
             size,
         })
     }
@@ -666,7 +667,8 @@ pub struct TextLayout {
 
 impl TextLayout {
     #[inline]
-    pub fn new<'a, T>(ctx: &'a Context<T>) -> TextLayoutBuilder<'a, T>
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new<T>(ctx: &Context<T>) -> TextLayoutBuilder<T>
     where
         T: Backend,
     {
@@ -740,10 +742,9 @@ impl PartialEq for TextLayout {
 
 impl Eq for TextLayout {}
 
-impl ToString for TextLayout {
-    #[inline]
-    fn to_string(&self) -> String {
-        self.chars.iter().collect()
+impl std::fmt::Display for TextLayout {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.chars().iter().collect::<String>())
     }
 }
 
