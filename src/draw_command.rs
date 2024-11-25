@@ -159,6 +159,11 @@ impl<'a, T: Backend> DrawCommand<'a, T> {
     pub(crate) fn new(ctx: &'a Context<T>) -> Self {
         Self { ctx }
     }
+    
+    #[inline]
+    pub fn context(&self) -> &Context<T> {
+        self.ctx
+    }
 
     #[inline]
     pub fn clear(&self, color: impl Into<Rgba>) {
