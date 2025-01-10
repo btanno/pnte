@@ -166,7 +166,10 @@ fn main() -> anyhow::Result<()> {
                 next_frame += 1;
                 cmd_queue.Signal(&fence, frame)?;
                 if fence.GetCompletedValue() < frame {
-                    fence.SetEventOnCompletion(frame, None)?;
+                    fence.SetEventOnCompletion(
+                        frame,
+                        windows::Win32::Foundation::HANDLE::default(),
+                    )?;
                 }
             },
             Err(wiard::TryRecvError::Disconnected) => break,
