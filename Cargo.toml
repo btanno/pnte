@@ -16,7 +16,7 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 thiserror = "1.0"
 
 [dependencies.windows]
-version = "0.58"
+version = "0.59"
 features = [
     "Win32_Foundation",
     "Win32_Security",
@@ -38,6 +38,6 @@ features = [
 ]
 
 [dev-dependencies]
-winit = { version = "0.29", features = ["rwh_06"] }
-wiard = "0.1.8"
+winit = { version = "0.30", features = ["rwh_06"] }
+wiard = "0.3"
 anyhow = { version = "1.0", features = ["backtrace"] }

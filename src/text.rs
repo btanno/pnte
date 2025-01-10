@@ -608,12 +608,7 @@ where
         let s = HSTRING::from(self.txt);
         let layout: IDWriteTextLayout3 = unsafe {
             factory
-                .CreateTextLayout(
-                    s.as_wide(),
-                    &self.format.format,
-                    f32::MAX,
-                    f32::MAX,
-                )?
+                .CreateTextLayout(&s, &self.format.format, f32::MAX, f32::MAX)?
                 .cast()?
         };
         let typography = unsafe {
@@ -626,7 +621,7 @@ where
                 &typography,
                 DWRITE_TEXT_RANGE {
                     startPosition: 0,
-                    length: s.as_wide().len() as u32,
+                    length: (&s).len() as u32,
                 },
             )?;
             typography
