@@ -1,8 +1,8 @@
-use windows::core::Interface;
 use windows::Win32::{
     Foundation::HWND, Graphics::Direct3D::*, Graphics::Direct3D12::*, Graphics::Dxgi::Common::*,
     Graphics::Dxgi::*,
 };
+use windows::core::Interface;
 
 fn main() -> anyhow::Result<()> {
     pnte::co_initialize(pnte::CoInit::ApartmentThreaded)?;

@@ -1,10 +1,10 @@
 use super::*;
-use windows::core::{IUnknown, Interface};
 use windows::Win32::{
     Foundation::E_FAIL, Graphics::Direct2D::Common::*, Graphics::Direct2D::*,
     Graphics::Direct3D11::*, Graphics::Direct3D11on12::*, Graphics::Direct3D12::*,
     Graphics::Dxgi::*,
 };
+use windows::core::{IUnknown, Interface};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct RenderTarget {

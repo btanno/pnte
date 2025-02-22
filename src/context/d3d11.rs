@@ -1,9 +1,9 @@
 use super::*;
-use windows::core::Interface;
 use windows::Win32::{
     Graphics::Direct2D::Common::*, Graphics::Direct2D::*, Graphics::Direct3D11::*,
     Graphics::Dxgi::*,
 };
+use windows::core::Interface;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct RenderTarget(ID2D1Bitmap1);
@@ -78,13 +78,13 @@ impl Context<Direct3D11> {
     where
         T: Interface,
     {
-        match target.cast::<IDXGISwapChain1>() { Ok(swap_chain) => {
-            self.create_render_target_from_swap_chain(&swap_chain)
-        } _ => { match target.cast::<ID3D11Texture2D>() { Ok(texture) => {
-            self.create_render_target_from_texture(&texture)
-        } _ => {
-            Err(Error::NoInterface)
-        }}}}
+        match target.cast::<IDXGISwapChain1>() {
+            Ok(swap_chain) => self.create_render_target_from_swap_chain(&swap_chain),
+            _ => match target.cast::<ID3D11Texture2D>() {
+                Ok(texture) => self.create_render_target_from_texture(&texture),
+                _ => Err(Error::NoInterface),
+            },
+        }
     }
 
     fn create_render_target_from_swap_chain(

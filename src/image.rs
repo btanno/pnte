@@ -1,7 +1,7 @@
 use crate::*;
 use std::path::Path;
-use windows::core::{Interface, GUID, HSTRING};
 use windows::Win32::{Foundation::GENERIC_READ, Graphics::Direct2D::*, Graphics::Imaging::*};
+use windows::core::{GUID, HSTRING, Interface};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(i32)]

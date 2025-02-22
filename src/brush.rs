@@ -1,6 +1,6 @@
 use crate::*;
-use windows::core::Interface;
 use windows::Win32::Graphics::{Direct2D::Common::*, Direct2D::*};
+use windows::core::Interface;
 
 pub trait Brush {
     fn handle(&self) -> &ID2D1Brush;
