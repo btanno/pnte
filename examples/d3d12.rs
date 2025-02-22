@@ -95,7 +95,8 @@ fn main() -> anyhow::Result<()> {
     let fence: ID3D12Fence = unsafe { device.CreateFence(0, D3D12_FENCE_FLAG_NONE)? };
     let mut next_frame = 1u64;
     loop {
-        match event_rx.try_recv() {
+        let event = event_rx.try_recv();
+        match event {
             Ok((event, _)) => match event {
                 _ => {}
             },

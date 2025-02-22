@@ -78,13 +78,13 @@ impl Context<Direct3D11> {
     where
         T: Interface,
     {
-        if let Ok(swap_chain) = target.cast::<IDXGISwapChain1>() {
+        match target.cast::<IDXGISwapChain1>() { Ok(swap_chain) => {
             self.create_render_target_from_swap_chain(&swap_chain)
-        } else if let Ok(texture) = target.cast::<ID3D11Texture2D>() {
+        } _ => { match target.cast::<ID3D11Texture2D>() { Ok(texture) => {
             self.create_render_target_from_texture(&texture)
-        } else {
+        } _ => {
             Err(Error::NoInterface)
-        }
+        }}}}
     }
 
     fn create_render_target_from_swap_chain(
