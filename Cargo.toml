@@ -13,10 +13,10 @@ keywords = ["graphics", "gui", "windows"]
 [dependencies]
 raw-window-handle = "0.6"
 serde = { version = "1.0", features = ["derive"], optional = true }
-thiserror = "1.0"
+thiserror = "2.0"
 
 [dependencies.windows]
-version = "0.59"
+version = "0.60"
 features = [
     "Win32_Foundation",
     "Win32_Security",
@@ -39,5 +39,5 @@ features = [
 
 [dev-dependencies]
 winit = { version = "0.30", features = ["rwh_06"] }
-wiard = "0.3"
+wiard = "0.4"
 anyhow = { version = "1.0", features = ["backtrace"] }
