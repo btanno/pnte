@@ -1,7 +1,7 @@
 use crate::*;
 use std::sync::Arc;
-use windows::Win32::{Foundation::BOOL, Graphics::DirectWrite::*};
-use windows::core::{HSTRING, Interface};
+use windows::Win32::Graphics::DirectWrite::*;
+use windows::core::{BOOL, HSTRING, Interface};
 
 pub enum FontWeight {}
 
