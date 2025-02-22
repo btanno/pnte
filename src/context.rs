@@ -9,7 +9,7 @@ use windows::Win32::{
     Graphics::DirectWrite::*,
     Graphics::Imaging::D2D::*,
     Graphics::Imaging::*,
-    System::Com::{CoCreateInstance, CLSCTX_INPROC_SERVER},
+    System::Com::{CLSCTX_INPROC_SERVER, CoCreateInstance},
 };
 
 pub trait Target {

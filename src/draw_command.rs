@@ -63,7 +63,7 @@ pub enum DashStyle<'a> {
     Custom(&'a [f32]),
 }
 
-impl<'a> DashStyle<'a> {
+impl DashStyle<'_> {
     fn value(&self) -> (D2D1_DASH_STYLE, Option<&[f32]>) {
         match self {
             Self::Solid => (D2D1_DASH_STYLE_SOLID, None),
@@ -84,7 +84,7 @@ pub struct Dash<'a> {
     pub offset: f32,
 }
 
-impl<'a> Default for Dash<'a> {
+impl Default for Dash<'_> {
     #[inline]
     fn default() -> Self {
         Self {
@@ -104,7 +104,7 @@ pub struct StrokeStyleProperties<'a> {
     pub dash: Option<Dash<'a>>,
 }
 
-impl<'a> Default for StrokeStyleProperties<'a> {
+impl Default for StrokeStyleProperties<'_> {
     #[inline]
     fn default() -> Self {
         Self {
@@ -159,7 +159,7 @@ impl<'a, T: Backend> DrawCommand<'a, T> {
     pub(crate) fn new(ctx: &'a Context<T>) -> Self {
         Self { ctx }
     }
-    
+
     #[inline]
     pub fn context(&self) -> &Context<T> {
         self.ctx

@@ -1,7 +1,7 @@
 use crate::*;
 use std::sync::Arc;
-use windows::core::{Interface, HSTRING};
 use windows::Win32::{Foundation::BOOL, Graphics::DirectWrite::*};
+use windows::core::{HSTRING, Interface};
 
 pub enum FontWeight {}
 
@@ -238,7 +238,7 @@ pub enum Font<'a, 'b> {
     Memory(&'a [u8], &'b str),
 }
 
-impl<'a, 'b> Font<'a, 'b> {
+impl Font<'_, '_> {
     fn font_name(&self) -> &str {
         match self {
             Self::System(name) => name,
@@ -309,7 +309,7 @@ pub struct TextFormatBuilder<'a, F = (), S = ()> {
     locale: Option<&'a str>,
 }
 
-impl<'a> TextFormatBuilder<'a, (), ()> {
+impl TextFormatBuilder<'_, (), ()> {
     fn new<T: Backend>(ctx: &Context<T>) -> Self {
         Self {
             factory: ctx.dwrite_factory.clone(),
@@ -404,7 +404,7 @@ impl<'a, F, S> TextFormatBuilder<'a, F, S> {
     }
 }
 
-impl<'a, 'b, 'c> TextFormatBuilder<'a, Font<'b, 'c>, f32> {
+impl TextFormatBuilder<'_, Font<'_, '_>, f32> {
     #[inline]
     pub fn build(self) -> Result<TextFormat> {
         let font_name = self.fnt.font_name();
@@ -599,7 +599,7 @@ where
     }
 }
 
-impl<'a, 'b, 'c, T> TextLayoutBuilder<'a, T, &'b str, &'c TextFormat>
+impl<T> TextLayoutBuilder<'_, T, &str, &TextFormat>
 where
     T: Backend,
 {
@@ -621,7 +621,7 @@ where
                 &typography,
                 DWRITE_TEXT_RANGE {
                     startPosition: 0,
-                    length: (&s).len() as u32,
+                    length: s.len() as u32,
                 },
             )?;
             typography
@@ -743,21 +743,21 @@ impl std::fmt::Display for TextLayout {
     }
 }
 
-impl<'a> Text for &'a TextLayout {
+impl Text for &TextLayout {
     #[inline]
     fn layout<T: Backend>(self, _ctx: &Context<T>, _format: &TextFormat) -> Result<TextLayout> {
         Ok(self.clone())
     }
 }
 
-impl<'a> Text for &'a str {
+impl Text for &str {
     #[inline]
     fn layout<T: Backend>(self, ctx: &Context<T>, format: &TextFormat) -> Result<TextLayout> {
         TextLayout::new(ctx).text(self).format(format).build()
     }
 }
 
-impl<'a> Text for &'a String {
+impl Text for &String {
     #[inline]
     fn layout<T: Backend>(self, ctx: &Context<T>, format: &TextFormat) -> Result<TextLayout> {
         TextLayout::new(ctx).text(self).format(format).build()
