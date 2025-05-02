@@ -113,8 +113,8 @@ impl LinearGradientBrush {
         let brush = unsafe {
             dc.CreateLinearGradientBrush(
                 &D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES {
-                    startPoint: D2D_POINT_2F::from(start.into()),
-                    endPoint: D2D_POINT_2F::from(end.into()),
+                    startPoint: start.into().into(),
+                    endPoint: end.into().into(),
                 },
                 None,
                 &stops,

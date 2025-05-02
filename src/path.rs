@@ -1,5 +1,6 @@
 use crate::*;
 use windows::Win32::Graphics::{Direct2D::Common::*, Direct2D::*};
+use windows_numerics::Vector2;
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
@@ -95,7 +96,7 @@ impl PathBuilder {
     pub fn add_lines(self, points: &[Point<f32>]) -> Self {
         unsafe {
             let lines =
-                std::slice::from_raw_parts(points.as_ptr() as *const D2D_POINT_2F, points.len());
+                std::slice::from_raw_parts(points.as_ptr() as *const Vector2, points.len());
             self.sink.AddLines(lines);
         }
         self

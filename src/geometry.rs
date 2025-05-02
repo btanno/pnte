@@ -1,4 +1,5 @@
 use windows::Win32::Graphics::Direct2D::Common::*;
+use windows_numerics::Vector2;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(C)]
@@ -22,12 +23,12 @@ impl<T> Point<T> {
     }
 }
 
-impl From<Point<f32>> for D2D_POINT_2F {
+impl From<Point<f32>> for Vector2 {
     #[inline]
     fn from(value: Point<f32>) -> Self {
         Self {
-            x: value.x,
-            y: value.y,
+            X: value.x,
+            Y: value.y,
         }
     }
 }
@@ -42,12 +43,12 @@ impl From<Point<u32>> for D2D_POINT_2U {
     }
 }
 
-impl From<D2D_POINT_2F> for Point<f32> {
+impl From<Vector2> for Point<f32> {
     #[inline]
-    fn from(value: D2D_POINT_2F) -> Self {
+    fn from(value: Vector2) -> Self {
         Self {
-            x: value.x,
-            y: value.y,
+            x: value.X,
+            y: value.Y,
         }
     }
 }
@@ -281,22 +282,22 @@ impl<T> Vector<T> {
     }
 }
 
-impl From<Vector<f32>> for D2D_VECTOR_2F {
+impl From<Vector<f32>> for Vector2 {
     #[inline]
     fn from(value: Vector<f32>) -> Self {
         Self {
-            x: value.x,
-            y: value.y,
+            X: value.x,
+            Y: value.y,
         }
     }
 }
 
-impl From<D2D_VECTOR_2F> for Vector<f32> {
+impl From<Vector2> for Vector<f32> {
     #[inline]
-    fn from(value: D2D_VECTOR_2F) -> Self {
+    fn from(value: Vector2) -> Self {
         Self {
-            x: value.x,
-            y: value.y,
+            x: value.X,
+            y: value.Y,
         }
     }
 }
