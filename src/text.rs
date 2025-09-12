@@ -663,7 +663,7 @@ pub struct TextLayout {
 impl TextLayout {
     #[inline]
     #[allow(clippy::new_ret_no_self)]
-    pub fn new<T>(ctx: &Context<T>) -> TextLayoutBuilder<T>
+    pub fn new<T>(ctx: &Context<T>) -> TextLayoutBuilder<'_, T>
     where
         T: Backend,
     {

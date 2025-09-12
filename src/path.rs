@@ -95,8 +95,7 @@ impl PathBuilder {
     #[inline]
     pub fn add_lines(self, points: &[Point<f32>]) -> Self {
         unsafe {
-            let lines =
-                std::slice::from_raw_parts(points.as_ptr() as *const Vector2, points.len());
+            let lines = std::slice::from_raw_parts(points.as_ptr() as *const Vector2, points.len());
             self.sink.AddLines(lines);
         }
         self
